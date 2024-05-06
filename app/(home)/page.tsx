@@ -6,6 +6,7 @@ import { todoSectionCategories } from "@/lib/data"
 
 
 export default function Home() {
+
   return (
     <div className="p-20 space-y-16 w-full h-full">
       <div className="flex gap-x-3">

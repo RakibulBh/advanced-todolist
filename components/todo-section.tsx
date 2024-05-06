@@ -1,14 +1,14 @@
 "use client"
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
-import { todos } from "@/lib/data";
+import { Key, useEffect, useState } from "react";
 import {Todo} from "@/components/todo";
+import {todos} from '@/lib/data'
+
 
 export default function TodoSection({category}: {category: string}) {
- 
-  const [showTodos, setShowTodos] = useState(false)
 
+  const [showTodos, setShowTodos] = useState(false)
   const toggleShowTodos = () => {
     setShowTodos(!showTodos);
   };
@@ -25,7 +25,7 @@ export default function TodoSection({category}: {category: string}) {
           {!showTodos && 
             <div className="flex flex-col">
                 {todos.map((todo) => (
-                    <Todo key={todo.title} title={todo.title} done={todo.done}  />
+                  <Todo key={todo.title} title={todo.title} done={todo.done} />
                 ))}
             </div>
           }
