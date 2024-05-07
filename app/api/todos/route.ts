@@ -1,20 +1,23 @@
-import { prisma } from "@/lib/db/client";
+import prisma from "@/lib/db/client";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-   try {
+  try {
+    const { title, due, category } = await req.json();
 
-    const {title, due} = await req.json();
+    const newTodo = await prisma.todo.create({
+      data: {
+        title,
+        due,
+        category,
+      },
+    });
 
-    const newPost = await prisma.todo.create({
-        data: {
-            title, due
-        }
-    })
-
-    return NextResponse.json(newPost, {status: 201});
-
-   } catch(error) {
-        return NextResponse.json({message: 'Something went wrong'}, {status: 500});
-   }
+    return NextResponse.json(newTodo, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { message: "Something went wrong" },
+      { status: 500 }
+    );
+  }
 }

@@ -9,7 +9,7 @@ import { getServerSession } from "next-auth";
 import { SessionProvider } from "next-auth/react";
 import { Logout } from "@/components/auth/logout";
 
-const roboto = Roboto({ subsets: ["latin"], weight: "400" });
+const roboto = Roboto({ subsets: ["latin"], weight: "500" });
 
 export const metadata: Metadata = {
   title: "To-do list",

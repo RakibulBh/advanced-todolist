@@ -11,6 +11,7 @@ import { Plus } from "lucide-react";
 import { FormEvent } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
+import { SelectScrollable } from "./select";
 
 export default function CreateTodoDialog() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -38,6 +39,8 @@ export default function CreateTodoDialog() {
             className="w-full"
             type="date"
           />
+          <Label htmlFor="category">Category</Label>
+          <SelectScrollable />
           <Button type="submit">Submit</Button>
         </form>
       </DialogContent>
