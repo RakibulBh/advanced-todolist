@@ -19,4 +19,12 @@ model Todo {
   title String
   done  Boolean  @default(false)
   due   DateTime
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id    String @id @default(uuid())
+  todos Todo[]
 }

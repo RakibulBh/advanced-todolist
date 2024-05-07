@@ -39,12 +39,6 @@ const handler = NextAuth({
           return null;
         }
 
-        console.log({
-          id: userExists.id,
-          email: userExists.email,
-          password: userExists.password,
-        });
-
         return {
           id: userExists.id,
           email: userExists.email,
