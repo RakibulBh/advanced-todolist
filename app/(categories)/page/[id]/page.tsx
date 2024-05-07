@@ -2,13 +2,11 @@ import { Plus } from "lucide-react";
 import Image from "next/image";
 
 import TodoSection from "@/components/todo-section";
-import { todoSectionCategories } from "@/lib/data"
+import { todoSectionCategories } from "@/lib/data";
 
-
-export default function Home() {
-
+export default function SectionContent() {
   return (
-    <div className="p-20 space-y-16 w-full h-full">
+    <div className="p-10 space-y-16 w-full h-full">
       <div className="flex gap-x-3">
         <span className="text-3xl">📦</span>
         <span className="font-extrabold text-3xl">Personal</span>
@@ -21,5 +19,5 @@ export default function Home() {
         <TodoSection key={category} category={category} />
       ))}
     </div>
-  )
+  );
 }

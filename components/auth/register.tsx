@@ -1,6 +1,9 @@
 "use client";
 
 import React, { FormEvent } from "react";
+import { Input } from "./input";
+import { Button } from "../ui/button";
+import Link from "next/link";
 
 export const Register = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -18,15 +21,30 @@ export const Register = () => {
   };
 
   return (
-    <form className="flex flex-col gap-2 mx-auto" onSubmit={handleSubmit}>
-      <input type="email" name="email" id="" placeholder="email" />
-      <input type="password" name="password" id="" placeholder="password" />
-      <button
-        className="w-[10rem] p-2 rounded-md text-white bg-blue-500"
-        type="submit"
+    <div className="w-full h-full flex items-center flex-col gap-y-10 justify-center">
+      <h1 className="text-2xl font-bold text-gray-600 capitalize">Register</h1>
+      <form
+        className="flex flex-col gap-y-5 mx-auto items-center w-1/2"
+        onSubmit={handleSubmit}
       >
-        Submit
-      </button>
-    </form>
+        <Input type="email" name="email" id="email" placeholder="email" />
+        <Input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="password"
+        />
+        <p className="w-full text-sm flex justify-start">
+          have an account?{""}
+          <Link
+            className="underline text-gray-500 underline-offset-2"
+            href="/login"
+          >
+            Login here.
+          </Link>
+        </p>
+        <Button className="w-full ">Register</Button>
+      </form>
+    </div>
   );
 };
