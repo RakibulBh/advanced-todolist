@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
@@ -8,14 +10,48 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { Plus } from "lucide-react";
-import { FormEvent } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { SelectScrollable } from "./select";
 
 export default function CreateTodoDialog() {
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const [showNewCategory, setShowNewCategory] = useState(false);
+
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
+    const data = {
+      title: e.target.title?.value,
+      date: e.target.date?.value,
+      category: e.target.category?.value,
+      newCategory: e.target.newCategory?.value,
+    };
+
+    if (
+      data.title?.trim() == "" ||
+      data.date?.trim() == "" ||
+      data.category?.trim() == ""
+    ) {
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/todos", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (res.ok) {
+        console.log("Todo created successfully");
+      } else {
+        console.error("Something went wrong");
+      }
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
@@ -28,7 +64,7 @@ export default function CreateTodoDialog() {
         <DialogHeader>
           <DialogTitle>Create a new todo</DialogTitle>
         </DialogHeader>
-        <form className="w-full flex flex-col gap-y-5">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-y-5">
           <Label htmlFor="title">Email</Label>
           <Input id="title" name="title" placeholder="Title" />
           <Label htmlFor="date">Email</Label>
@@ -40,7 +76,19 @@ export default function CreateTodoDialog() {
             type="date"
           />
           <Label htmlFor="category">Category</Label>
-          <SelectScrollable />
+          <SelectScrollable setShowNewCategory={setShowNewCategory} />
+          {showNewCategory && (
+            <>
+              <Label htmlFor="new-category">New category</Label>
+              <Input
+                id="newCategory"
+                name="new-category"
+                placeholder="New category title"
+                className="w-full"
+                type="text"
+              />
+            </>
+          )}
           <Button type="submit">Submit</Button>
         </form>
       </DialogContent>
