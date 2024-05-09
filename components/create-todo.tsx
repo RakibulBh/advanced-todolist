@@ -17,13 +17,14 @@ import { SelectScrollable } from "./select";
 
 export default function CreateTodoDialog() {
   const [showNewCategory, setShowNewCategory] = useState(false);
+  const [category, setCategory] = useState("");
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const data = {
       title: e.target.title?.value,
       date: e.target.date?.value,
-      category: e.target.category?.value,
+      category: category,
       newCategory: e.target.newCategory?.value,
     };
 
@@ -76,7 +77,10 @@ export default function CreateTodoDialog() {
             type="date"
           />
           <Label htmlFor="category">Category</Label>
-          <SelectScrollable setShowNewCategory={setShowNewCategory} />
+          <SelectScrollable
+            setCategory={setCategory}
+            setShowNewCategory={setShowNewCategory}
+          />
           {showNewCategory && (
             <>
               <Label htmlFor="new-category">New category</Label>

@@ -16,17 +16,19 @@ export async function POST(req: Request) {
       },
     });
 
-    const newCat = await prisma.category.findFirst({
-      where: {
-        name: newCategory,
-      },
-    });
+    if (newCategory) {
+      const newCat = await prisma.category.findFirst({
+        where: {
+          name: newCategory,
+        },
+      });
 
-    if (newCat) {
-      return NextResponse.json(
-        { message: "Category already exists" },
-        { status: 400 }
-      );
+      if (newCat) {
+        return NextResponse.json(
+          { message: "Category already exists" },
+          { status: 400 }
+        );
+      }
     }
 
     if (!user) {
@@ -63,6 +65,8 @@ export async function POST(req: Request) {
     const newTodo = await prisma.todo.create({
       data,
     });
+
+    console.log(newTodo);
 
     return NextResponse.json(
       { message: "Successfully created a todo!" },
