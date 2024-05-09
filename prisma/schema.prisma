@@ -12,26 +12,22 @@ model User {
   id       String @id @default(uuid())
   email    String @unique
   password String
-
-  categories Category[]
+  todos    Todo[] // One-to-many relation with Todo
 }
 
 model Category {
-  id   String @id @default(uuid())
-  name String
-
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id])
-
-  todos Todo[]
+  id    String @id @default(uuid())
+  name  String
+  todos Todo[] // One-to-many relation with Todo
 }
 
 model Todo {
-  id    String   @id @default(uuid())
-  title String
-  done  Boolean  @default(false)
-  due   DateTime
-
-  categoryId String
-  category   Category @relation(fields: [categoryId], references: [id])
+  id         String   @id @default(uuid())
+  title      String
+  done       Boolean  @default(false)
+  due        DateTime
+  userId     String // Foreign key for the relation
+  user       User     @relation(fields: [userId], references: [id]) // Many-to-one relation with User
+  categoryId String // Foreign key for the relation
+  category   Category @relation(fields: [categoryId], references: [id]) // Many-to-one relation with Category
 }

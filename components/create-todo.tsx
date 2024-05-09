@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { Plus } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { SelectScrollable } from "./select";
@@ -66,9 +66,7 @@ export default function CreateTodoDialog() {
           <DialogTitle>Create a new todo</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="w-full flex flex-col gap-y-5">
-          <Label htmlFor="title">Email</Label>
           <Input id="title" name="title" placeholder="Title" />
-          <Label htmlFor="date">Email</Label>
           <Input
             id="date"
             name="date"
@@ -76,7 +74,6 @@ export default function CreateTodoDialog() {
             className="w-full"
             type="date"
           />
-          <Label htmlFor="category">Category</Label>
           <SelectScrollable
             setCategory={setCategory}
             setShowNewCategory={setShowNewCategory}
