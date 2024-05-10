@@ -1,4 +1,15 @@
 "use client";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 import {
   Dialog,
@@ -10,49 +21,51 @@ import {
 import { Input } from "@/components/ui/input";
 
 import { Plus } from "lucide-react";
-import { useState } from "react";
-import { Label } from "./ui/label";
 import { Button } from "./ui/button";
-import { SelectScrollable } from "./select";
+import {
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  Select,
+} from "@/components/ui/select";
+
+// TODO: get input values from the form
+
+const formSchema = z
+  .object({
+    title: z.string(),
+    date: z.string(),
+    category: z.enum(["work", "Create new"]),
+    newCategory: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.category === "Create new") {
+        return !!data.newCategory;
+      }
+      return true;
+    },
+    {
+      message: "Please enter a new category",
+      path: ["newCategory"],
+    }
+  );
 
 export default function CreateTodoDialog() {
-  const [showNewCategory, setShowNewCategory] = useState(false);
-  const [category, setCategory] = useState("");
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      date: "",
+      newCategory: "",
+    },
+  });
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    const data = {
-      title: e.target.title?.value,
-      date: e.target.date?.value,
-      category: category,
-      newCategory: e.target.newCategory?.value,
-    };
+  const category = form.watch("category");
 
-    if (
-      data.title?.trim() == "" ||
-      data.date?.trim() == "" ||
-      data.category?.trim() == ""
-    ) {
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/todos", {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (res.ok) {
-        console.log("Todo created successfully");
-      } else {
-        console.error("Something went wrong");
-      }
-    } catch (e) {
-      console.log(e);
-    }
+  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    console.log({ values });
   };
 
   return (
@@ -65,33 +78,88 @@ export default function CreateTodoDialog() {
         <DialogHeader>
           <DialogTitle>Create a new todo</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="w-full flex flex-col gap-y-5">
-          <Input id="title" name="title" placeholder="Title" />
-          <Input
-            id="date"
-            name="date"
-            placeholder="Date"
-            className="w-full"
-            type="date"
-          />
-          <SelectScrollable
-            setCategory={setCategory}
-            setShowNewCategory={setShowNewCategory}
-          />
-          {showNewCategory && (
-            <>
-              <Label htmlFor="new-category">New category</Label>
-              <Input
-                id="newCategory"
-                name="new-category"
-                placeholder="New category title"
-                className="w-full"
-                type="text"
+        <Form {...form}>
+          <form
+            className="w-full flex flex-col gap-4"
+            onSubmit={form.handleSubmit(handleSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Title" type="text" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Date" type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="work">Work</SelectItem>
+                        <SelectItem value="Create new">Create new</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+            {category === "Create new" && (
+              <FormField
+                control={form.control}
+                name="newCategory"
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel>New category</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="New category"
+                          type="text"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
-            </>
-          )}
-          <Button type="submit">Submit</Button>
-        </form>
+            )}
+            <Button type="submit">Submit</Button>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

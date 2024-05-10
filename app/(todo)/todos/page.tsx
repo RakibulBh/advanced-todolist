@@ -1,31 +1,20 @@
-"use client";
+import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
 
 import TodoSection from "@/components/todo-section";
 import CreateTodoDialog from "@/components/create-todo";
-import { useEffect, useState } from "react";
 
-export default function SectionContent() {
-  const [todos, setTodos] = useState([]);
+type Todo = {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+};
 
-  useEffect(() => {
-    const getTodos = async () => {
-      try {
-        const response = await fetch("/api/todos", {
-          method: "GET",
-        });
+export default async function SectionContent() {
+  const res = await fetch("http://localhost:3000//api/todos");
+  const todos = await res.json();
 
-        if (response.ok) {
-          const todos = await response.json();
-          console.log(todos);
-          setTodos(todos);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    getTodos();
-  }, []);
+  console.log(todos);
 
   return (
     <div className="p-10 space-y-14 w-full h-full">
@@ -34,9 +23,9 @@ export default function SectionContent() {
         <span className="font-extrabold text-3xl">Todo list</span>
       </div>
       <CreateTodoDialog />
-      <TodoSection todos={todos} title="Today" />
+      {/* <TodoSection todos={todos} title="Today" />
       <TodoSection todos={todos} title="This week" />
-      <TodoSection todos={todos} title="Later" />
+      <TodoSection todos={todos} title="Later" /> */}
     </div>
   );
 }

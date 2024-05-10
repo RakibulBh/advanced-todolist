@@ -7,8 +7,10 @@ export async function POST(req: Request) {}
 export async function GET(req: Request) {
   const session = await getServerSession();
 
+  console.log(session);
+
   if (!session) {
-    return;
+    return NextResponse.json({ message: "Invalid session" }, { status: 400 });
   }
 
   const user = await prisma.user.findFirst({
@@ -18,7 +20,7 @@ export async function GET(req: Request) {
   });
 
   if (!user) {
-    return;
+    return NextResponse.json({ message: "User not found" }, { status: 400 });
   }
 
   const todos = await prisma.todo.findMany({
