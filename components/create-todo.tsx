@@ -29,6 +29,22 @@ import {
   SelectItem,
   Select,
 } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { Category } from "./category";
+
+type Todo = {
+  id: string;
+  title: string;
+  date: string;
+  categoryId: string;
+};
+
+type Category = {
+  id: string;
+  name: string;
+  authorId: string;
+  todos: Todo[];
+};
 
 // TODO: get input values from the form
 
@@ -36,7 +52,7 @@ const formSchema = z
   .object({
     title: z.string(),
     date: z.string(),
-    category: z.enum(["work", "Create new"]),
+    category: z.string(),
     newCategory: z.string().optional(),
   })
   .refine(
@@ -70,6 +86,18 @@ export default function CreateTodoDialog() {
       body: JSON.stringify(values),
     });
   };
+
+  const [categories, setCategories] = useState([] as Category[]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await fetch("http://localhost:3000/api/categories");
+      const data = await res.json();
+      setCategories(data);
+    };
+
+    fetchCategories();
+  }, []);
 
   return (
     <Dialog>
@@ -130,7 +158,11 @@ export default function CreateTodoDialog() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="work">Work</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.name}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
                         <SelectItem value="Create new">Create new</SelectItem>
                       </SelectContent>
                     </Select>

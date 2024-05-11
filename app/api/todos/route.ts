@@ -11,7 +11,7 @@ export async function POST(req: Request) {
 
   const { title, date, category, newCategory } = await req.json();
 
-  if (newCategory && category === "Create new") {
+  if (newCategory && category.toLowerCase().trim() === "createnew") {
     return NextResponse.json(
       { message: "New category cannot be named Create New" },
       { status: 400 }
@@ -44,6 +44,8 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
+
+    console.log("Here");
 
     const createdCategory = await prisma.category.create({
       data: {
@@ -78,6 +80,8 @@ export async function POST(req: Request) {
       categoryId,
     },
   });
+
+  console.log(todo);
 
   return NextResponse.json(todo, { status: 201 });
 }

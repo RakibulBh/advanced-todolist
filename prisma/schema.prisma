@@ -27,7 +27,7 @@ model Todo {
   id         String   @id @default(uuid())
   title      String
   done       Boolean  @default(false)
-  due        DateTime
+  due        String
   categoryId String   @default("085cba65-4827-428d-b427-ddf2fc3a559e")
   category   Category @relation(fields: [categoryId], references: [id]) // Many-to-one relation with Category
 }
