@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Category" ALTER COLUMN "authorId" SET DEFAULT '4936e6b1-f348-4645-b783-16dbc023e9d3';
+
+-- AlterTable
+ALTER TABLE "Todo" ALTER COLUMN "categoryId" SET DEFAULT '085cba65-4827-428d-b427-ddf2fc3a559e';

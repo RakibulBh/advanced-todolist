@@ -64,8 +64,11 @@ export default function CreateTodoDialog() {
 
   const category = form.watch("category");
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log({ values });
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    const res = await fetch("http://localhost:3000/api/todos", {
+      method: "POST",
+      body: JSON.stringify(values),
+    });
   };
 
   return (
