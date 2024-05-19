@@ -1,6 +1,4 @@
 "use client";
-
-import { navLinks } from "@/lib/data";
 import Link from "next/link";
 import Navlink from "./nav-link";
 import { getServerSession } from "next-auth";
@@ -11,11 +9,8 @@ import { LoginBtn } from "./auth/login-btn";
 import { Logout } from "./auth/logout";
 import { Calendar, CalendarCheck, CalendarClock, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Category } from "./category";
 
 export const Sidebar = () => {
-  const [categories, setCategories] = useState([]);
-
   const summaryData = [
     {
       title: "Today",
@@ -33,25 +28,6 @@ export const Sidebar = () => {
       count: 7,
     },
   ];
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/category", {
-          method: "GET",
-        });
-
-        if (response.ok) {
-          const categories = await response.json();
-          setCategories(categories);
-        }
-      } catch (error) {
-        console.error("Failed to fetch categories", error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <div className="pt-10 px-3 space-y-6 fixed h-screen w-[250px] bg-gray-100 border-r-gray-200 border-[1px]">
@@ -71,16 +47,6 @@ export const Sidebar = () => {
         <p className="">Trash</p>
       </div>
       <div className="h-[1px] w-full bg-gray-300" />
-      <nav>
-        {categories &&
-          categories.map((category: any) => (
-            <Category
-              key={category.id}
-              user={category.authorId}
-              title={category.name}
-            />
-          ))}
-      </nav>
     </div>
   );
 };

@@ -1,11 +1,15 @@
+"use client";
 import TodoSection from "@/components/todo-section";
 import CreateTodoDialog from "@/components/create-todo";
+import { useEffect, useState } from "react";
+import { set } from "zod";
+import { cn } from "@/lib/utils";
 
 interface Todo {
   id: string;
-  name: string;
-  date: string;
-  completed: boolean;
+  title: string;
+  due: string;
+  done: boolean;
 }
 interface Category {
   id: string;
@@ -13,18 +17,30 @@ interface Category {
   todos: Todo[];
 }
 
-export default async function SectionContent() {
-  const getData = async () => {
-    const res = await fetch("https://localhost:3000/api/categories");
+export default function SectionContent() {
+  const [categories, setCategories] = useState<Category[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-    if (!res.ok) {
-      console.log("Failed to fetch data");
-    }
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch("http://localhost:3000/api/categories");
+        if (!res.ok) {
+          throw new Error(`Error: ${res.status}`);
+        }
+        const data = await res.json();
+        setCategories(data);
+      } catch (err: any) {
+        setError(err.message);
+      }
 
-    return res.json();
-  };
+      setLoading(false);
+    };
 
-  const categories: Category[] = await getData();
+    getData();
+  }, []);
 
   return (
     <div className="p-10 space-y-14 w-full h-full">
@@ -33,7 +49,19 @@ export default async function SectionContent() {
         <span className="font-extrabold text-3xl">Todo list</span>
       </div>
       <CreateTodoDialog />
-      <TodoSection />
+      {loading && (
+        <div className="w-full flex justify-center items-center">
+          <p>Loading...</p>
+        </div>
+      )}
+      {!loading && !error && (
+        <>
+          {categories &&
+            categories.map((cateogry) => (
+              <TodoSection key={cateogry.id} category={cateogry} />
+            ))}
+        </>
+      )}
     </div>
   );
 }
