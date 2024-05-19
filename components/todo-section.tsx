@@ -10,12 +10,11 @@ interface Todo {
   due: string;
   done: boolean;
 }
-
-interface Category {
+type Category = {
   id: string;
   name: string;
   todos: Todo[];
-}
+};
 
 export default function TodoSection({ category }: { category: Category }) {
   const [open, setOpen] = useState(false);
@@ -30,7 +29,7 @@ export default function TodoSection({ category }: { category: Category }) {
         <div className="hover:cursor-pointer" onClick={handleClick}>
           {open ? <ChevronUp /> : <ChevronDown />}
         </div>
-        <p className="font-bold text-xl">{category.name}</p>
+        <p className="font-bold text-xl text-gray-700 ">{category.name}</p>
         <p className="text-gray-500 text-xl">{category.todos.length}</p>
       </div>
       <div className="pl-9 space-y-2">

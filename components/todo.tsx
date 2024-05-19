@@ -1,9 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { PencilLine, Square, SquareCheckBig, Trash2 } from "lucide-react";
+import { Square, SquareCheckBig, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import CreateTodoDialog from "./create-todo";
+import toast from "react-hot-toast";
 
 interface Todo {
   id: string;
@@ -25,7 +27,7 @@ export const Todo = ({ todo }: { todo: Todo }) => {
   };
 
   const handleTick = async () => {
-    const res = await fetch("http://localhost:3000/api/todos", {
+    const res = await fetch("http://localhost:3000/api/todo", {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -36,7 +38,7 @@ export const Todo = ({ todo }: { todo: Todo }) => {
     });
 
     if (!res.ok) {
-      console.log("Error updating todo");
+      toast.error(`Failed to update todo. Error code: ${res.status}`);
     }
 
     setDone(!done);
@@ -86,9 +88,7 @@ export const Todo = ({ todo }: { todo: Todo }) => {
           >
             <Trash2 className="text-red-500" />
           </div>
-          <div className="bg-blue-200 p-1 rounded-md hover:cursor-pointer">
-            <PencilLine className="text-blue-500" />
-          </div>
+          <CreateTodoDialog todo={todo} mode="edit" />
         </div>
       </div>
     </div>

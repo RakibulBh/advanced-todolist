@@ -89,26 +89,82 @@ export async function PUT(req: Request) {
     return NextResponse.json({ message: "Invalid session" }, { status: 400 });
   }
 
-  const { id } = await req.json();
-
-  const todo = await prisma.todo.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
-      id,
+      email: session.user.email || "",
     },
   });
 
-  if (!todo) {
-    return NextResponse.json({ message: "Todo not found" }, { status: 400 });
+  if (!user) {
+    return NextResponse.json({ message: "User not found" }, { status: 400 });
   }
 
-  const updatedTodo = await prisma.todo.update({
+  const requestBody = await req.json();
+  const { values, id } = requestBody;
+  const { title, date, category, newCategory } = values;
+
+  if (newCategory && category.toLowerCase().trim() === "createnew") {
+    return NextResponse.json(
+      { message: "New category cannot be named Create New" },
+      { status: 400 }
+    );
+  }
+
+  let categoryId;
+
+  if (category === "Create new") {
+    const existingCategory = await prisma.category.findFirst({
+      where: {
+        authorId: user.id,
+        name: newCategory,
+      },
+    });
+
+    if (existingCategory) {
+      return NextResponse.json(
+        { message: "Category already exists" },
+        { status: 400 }
+      );
+    }
+
+    const createdCategory = await prisma.category.create({
+      data: {
+        name: newCategory,
+        authorId: user.id,
+      },
+    });
+
+    categoryId = createdCategory.id;
+  } else {
+    const existingCategory = await prisma.category.findFirst({
+      where: {
+        authorId: user.id,
+        name: category,
+      },
+    });
+
+    if (!existingCategory) {
+      return NextResponse.json(
+        { message: "Category not found" },
+        { status: 400 }
+      );
+    }
+
+    categoryId = existingCategory.id;
+  }
+
+  const todo = await prisma.todo.update({
     where: {
       id,
     },
     data: {
-      done: !todo.done,
+      due: date,
+      title,
+      categoryId,
     },
   });
 
-  return NextResponse.json(updatedTodo, { status: 200 });
+  console.log(todo);
+
+  return NextResponse.json(todo, { status: 201 });
 }

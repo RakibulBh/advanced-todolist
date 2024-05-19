@@ -3,6 +3,7 @@ import { Roboto } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { cn } from "@/lib/utils";
+import { Toaster } from "react-hot-toast";
 
 import { getServerSession } from "next-auth";
 
@@ -24,6 +25,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={cn("flex w-full min-h-screen", roboto.className)}>
+        <Toaster />
         <Sidebar />
         <main className="pl-[250px] min-h-full w-full">{children}</main>
       </body>

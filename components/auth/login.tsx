@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Input } from "./input";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
 
 export const Login = () => {
   const router = useRouter();
@@ -21,8 +22,11 @@ export const Login = () => {
     });
 
     if (!response?.error) {
+      toast.success("Logged in successfully");
       router.push("/todos");
       router.refresh();
+    } else {
+      toast.error("Error logging in");
     }
   };
 

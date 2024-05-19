@@ -4,6 +4,7 @@ import React, { FormEvent } from "react";
 import { Input } from "./input";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { toast } from "react-hot-toast";
 
 export const Register = () => {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -17,7 +18,11 @@ export const Register = () => {
       }),
     });
 
-    console.log(response);
+    if (response.ok) {
+      toast.success("Registered successfully");
+    } else {
+      toast.error("Error registering");
+    }
   };
 
   return (
