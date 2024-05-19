@@ -45,8 +45,6 @@ export async function POST(req: Request) {
       );
     }
 
-    console.log("Here");
-
     const createdCategory = await prisma.category.create({
       data: {
         name: newCategory,
@@ -85,29 +83,3 @@ export async function POST(req: Request) {
 
   return NextResponse.json(todo, { status: 201 });
 }
-
-// export async function GET(req: Request) {
-//   const session = await getServerSession();
-
-//   if (!session?.user) {
-//     return NextResponse.json({ message: "Invalid session" }, { status: 400 });
-//   }
-
-//   const user = await prisma.user.findFirst({
-//     where: {
-//       email: session.user?.email ?? "",
-//     },
-//   });
-
-//   if (!user) {
-//     return NextResponse.json({ message: "User not found" }, { status: 400 });
-//   }
-
-//   const todos = await prisma.todo.findMany({
-//     where: {
-//       userId: user.id,
-//     },
-//   });
-
-//   return NextResponse.json(todos, { status: 200 });
-// }

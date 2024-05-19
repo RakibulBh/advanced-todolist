@@ -1,20 +1,30 @@
-import type { InferGetServerSidePropsType, GetServerSideProps } from "next";
-
 import TodoSection from "@/components/todo-section";
 import CreateTodoDialog from "@/components/create-todo";
 
-type Todo = {
+interface Todo {
   id: string;
-  title: string;
+  name: string;
   date: string;
-  category: string;
-};
+  completed: boolean;
+}
+interface Category {
+  id: string;
+  name: string;
+  todos: Todo[];
+}
 
 export default async function SectionContent() {
-  const res = await fetch("http://localhost:3000//api/todos");
-  const todos = await res.json();
+  const getData = async () => {
+    const res = await fetch("https://localhost:3000/api/categories");
 
-  console.log(todos);
+    if (!res.ok) {
+      console.log("Failed to fetch data");
+    }
+
+    return res.json();
+  };
+
+  const categories: Category[] = await getData();
 
   return (
     <div className="p-10 space-y-14 w-full h-full">
@@ -23,9 +33,7 @@ export default async function SectionContent() {
         <span className="font-extrabold text-3xl">Todo list</span>
       </div>
       <CreateTodoDialog />
-      {/* <TodoSection todos={todos} title="Today" />
-      <TodoSection todos={todos} title="This week" />
-      <TodoSection todos={todos} title="Later" /> */}
+      <TodoSection />
     </div>
   );
 }

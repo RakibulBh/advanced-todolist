@@ -18,7 +18,7 @@ model User {
 model Category {
   id       String @id @default(uuid())
   name     String
-  authorId String @default("4936e6b1-f348-4645-b783-16dbc023e9d3")
+  authorId String
   author   User   @relation(fields: [authorId], references: [id]) // Many-to-one relation with User
   todos    Todo[]
 }
@@ -28,6 +28,6 @@ model Todo {
   title      String
   done       Boolean  @default(false)
   due        String
-  categoryId String   @default("085cba65-4827-428d-b427-ddf2fc3a559e")
+  categoryId String
   category   Category @relation(fields: [categoryId], references: [id]) // Many-to-one relation with Category
 }
