@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { PencilLine, Square, SquareCheckBig, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface Todo {
   id: string;
@@ -12,6 +13,7 @@ interface Todo {
 }
 
 export const Todo = ({ todo }: { todo: Todo }) => {
+  const [done, setDone] = useState(todo.done);
   const router = useRouter();
 
   const handleDelete = async () => {
@@ -37,8 +39,7 @@ export const Todo = ({ todo }: { todo: Todo }) => {
       console.log("Error updating todo");
     }
 
-    router.push("/todos");
-    router.refresh();
+    setDone(!done);
   };
 
   const today = new Date();
@@ -58,7 +59,7 @@ export const Todo = ({ todo }: { todo: Todo }) => {
       <div className="gap-x-2 flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
           <div onClick={handleTick} className="hover:cursor-pointer">
-            {todo.done ? (
+            {done ? (
               <SquareCheckBig className="text-green-500" />
             ) : (
               <Square className=" text-gray-400" />

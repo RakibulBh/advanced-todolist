@@ -110,7 +110,5 @@ export async function PUT(req: Request) {
     },
   });
 
-  console.log(updatedTodo);
-
   return NextResponse.json(updatedTodo, { status: 200 });
 }
