@@ -24,7 +24,11 @@ export async function GET(req: Request) {
       authorId: user.id,
     },
     include: {
-      todos: true,
+      todos: {
+        orderBy: {
+          due: "asc",
+        },
+      },
     },
   });
 

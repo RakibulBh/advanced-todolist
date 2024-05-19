@@ -21,7 +21,7 @@ export const Login = () => {
     });
 
     if (!response?.error) {
-      router.push("/page/someid");
+      router.push("/todos");
       router.refresh();
     }
   };

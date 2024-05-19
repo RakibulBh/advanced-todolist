@@ -79,7 +79,38 @@ export async function POST(req: Request) {
     },
   });
 
-  console.log(todo);
-
   return NextResponse.json(todo, { status: 201 });
+}
+
+export async function PUT(req: Request) {
+  const session = await getServerSession();
+
+  if (!session?.user) {
+    return NextResponse.json({ message: "Invalid session" }, { status: 400 });
+  }
+
+  const { id } = await req.json();
+
+  const todo = await prisma.todo.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  if (!todo) {
+    return NextResponse.json({ message: "Todo not found" }, { status: 400 });
+  }
+
+  const updatedTodo = await prisma.todo.update({
+    where: {
+      id,
+    },
+    data: {
+      done: !todo.done,
+    },
+  });
+
+  console.log(updatedTodo);
+
+  return NextResponse.json(updatedTodo, { status: 200 });
 }

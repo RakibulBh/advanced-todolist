@@ -1,4 +1,7 @@
 "use client";
+
+import { useRouter } from "next/navigation";
+
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -30,7 +33,6 @@ import {
   Select,
 } from "@/components/ui/select";
 import { useEffect, useState } from "react";
-import { Category } from "./category";
 
 type Todo = {
   id: string;
@@ -69,6 +71,7 @@ const formSchema = z
   );
 
 export default function CreateTodoDialog() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -85,6 +88,10 @@ export default function CreateTodoDialog() {
       method: "POST",
       body: JSON.stringify(values),
     });
+
+    if (res.ok) {
+      router.refresh();
+    }
   };
 
   const [categories, setCategories] = useState([] as Category[]);
