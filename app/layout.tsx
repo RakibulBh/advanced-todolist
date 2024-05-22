@@ -25,9 +25,11 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={cn("flex w-full min-h-screen", roboto.className)}>
-        <Toaster />
-        <Sidebar />
-        <main className="pl-[250px] min-h-full w-full">{children}</main>
+        <SessionProvider>
+          <Toaster />
+          <Sidebar />
+          <main className="pl-[250px] min-h-full w-full">{children}</main>
+        </SessionProvider>
       </body>
     </html>
   );

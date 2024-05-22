@@ -54,14 +54,7 @@ export default function SectionContent() {
           <p>Loading...</p>
         </div>
       )}
-      {!loading && (
-        <>
-          {categories &&
-            categories.map((cateogry) => (
-              <TodoSection key={cateogry.id} category={cateogry} />
-            ))}
-        </>
-      )}
+      {!loading && <p>Hey</p>}
     </div>
   );
 }
