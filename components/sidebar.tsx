@@ -1,4 +1,3 @@
-"use client";
 import Link from "next/link";
 import Navlink from "./nav-link";
 import { getServerSession } from "next-auth";
@@ -6,11 +5,12 @@ import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import { signIn } from "next-auth/react";
 import { LoginBtn } from "./auth/login-btn";
-import { Logout } from "./auth/logout";
 import { Calendar, CalendarCheck, CalendarClock, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createClient } from "@/utils/supabase/server";
+import { signout } from "@/app/login/actions";
 
-export const Sidebar = () => {
+export const Sidebar = async () => {
   const summaryData = [
     {
       title: "Today",
@@ -28,6 +28,12 @@ export const Sidebar = () => {
       count: 7,
     },
   ];
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <div className="pt-10 px-3 space-y-6 fixed h-screen w-[250px] bg-gray-100 border-r-gray-200 border-[1px]">
@@ -47,6 +53,18 @@ export const Sidebar = () => {
         <p className="">Trash</p>
       </div>
       <div className="h-[1px] w-full bg-gray-300" />
+      {user ? (
+        <div>
+          <p>{user.email}</p>
+          <form action={signout}>
+            <Button>Logout</Button>
+          </form>
+        </div>
+      ) : (
+        <Button>
+          <Link href="/login">Login</Link>
+        </Button>
+      )}
     </div>
   );
 };

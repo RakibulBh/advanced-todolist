@@ -5,11 +5,6 @@ import { Sidebar } from "@/components/sidebar";
 import { cn } from "@/lib/utils";
 import { Toaster } from "react-hot-toast";
 
-import { getServerSession } from "next-auth";
-
-import { SessionProvider } from "next-auth/react";
-import { Logout } from "@/components/auth/logout";
-
 const roboto = Roboto({ subsets: ["latin"], weight: "500" });
 
 export const metadata: Metadata = {
@@ -25,11 +20,9 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={cn("flex w-full min-h-screen", roboto.className)}>
-        <SessionProvider>
-          <Toaster />
-          <Sidebar />
-          <main className="pl-[250px] min-h-full w-full">{children}</main>
-        </SessionProvider>
+        <Toaster />
+        <Sidebar />
+        <main className="pl-[250px] min-h-full w-full">{children}</main>
       </body>
     </html>
   );
