@@ -30,8 +30,15 @@ import {
   Select,
 } from "@/components/ui/select";
 import { useEffect, useRef, useState } from "react";
-import { createTodo, getCategories } from "@/app/todos/actions";
-import { Category } from "@/types/custom";
+import {
+  createCategory,
+  createTodo,
+  getCategories,
+  getCategory,
+  updateTodo,
+} from "@/app/todos/actions";
+import { Category, Todo } from "@/types/custom";
+import { formatDate } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -54,21 +61,19 @@ const formSchema = z
       path: ["newCategory"],
     }
   )
-  .refine(
-    (data) => {
-      if (data.date === "") {
-        return false;
-      }
-      return true;
-    },
-    {
-      message: "Date cannot be empty",
-      path: ["date"],
-    }
-  );
+  .refine((data) => data.date !== "", {
+    message: "Date cannot be empty",
+    path: ["date"],
+  });
 
-function FormContent() {
-  const [categories, setCategories] = useState<Category[] | null>();
+function FormContent({
+  mode,
+  todo,
+}: {
+  mode: "add" | "edit";
+  todo?: Todo | null;
+}) {
+  const [categories, setCategories] = useState<Category[] | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -84,20 +89,64 @@ function FormContent() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
-      date: "",
+      title: todo ? todo.title : "",
+      date: todo ? formatDate(todo.due) : "",
+      category: todo
+        ? categories?.find((cat) => cat.id === todo.category_id)?.name || ""
+        : "",
+      newCategory: "",
     },
   });
 
   const category = form.watch("category");
 
-  const handleSubmit = async (data: any) => {
-    if (data.category === "Create new") {
-      data.category = null;
-    } else {
-      data.newCategory = null;
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    if (
+      !data.category ||
+      !data.date ||
+      !data.title ||
+      (data.category === "Create new" && data.newCategory?.trim() === "")
+    ) {
+      toast.error("Please fill all the fields");
+      return;
     }
-    await createTodo(data);
+
+    let categoryId: number;
+
+    if (data.category === "Create new" && data.newCategory) {
+      const createdCategory = await createCategory(data.newCategory);
+      if (createdCategory instanceof Error) {
+        toast.error("Error occurred while creating new category");
+        return;
+      } else {
+        categoryId = createdCategory.id;
+      }
+    } else {
+      categoryId = await getCategory(data.category);
+    }
+
+    if (!categoryId) {
+      toast.error("Error occurred while fetching or creating category");
+      return;
+    }
+
+    const todoData = {
+      title: data.title,
+      due: data.date,
+      category_id: categoryId,
+    };
+
+    if (!todo) {
+      await createTodo({
+        ...todoData,
+      });
+    } else {
+      await updateTodo({
+        ...todo,
+        ...todoData,
+      });
+    }
+
     formRef.current?.reset();
   };
 
@@ -111,81 +160,72 @@ function FormContent() {
         <FormField
           control={form.control}
           name="title"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Title</FormLabel>
-                <FormControl>
-                  <Input placeholder="Title" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder="Title" type="text" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <FormField
           control={form.control}
           name="date"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Date</FormLabel>
-                <FormControl>
-                  <Input placeholder="Date" type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date</FormLabel>
+              <FormControl>
+                <Input placeholder="Date" type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         <FormField
           control={form.control}
           name="category"
-          render={({ field }) => {
-            return (
-              <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    field.onChange(value); // Ensures value is passed to form control
-                    form.setValue("category", value); // Sets value directly to the form
-                  }}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {categories &&
-                      categories.map((category: any) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    <SelectItem value="Create new">Create new</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            );
-          }}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Category</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  form.setValue("category", value);
+                }}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories?.map((category: Category) => (
+                    <SelectItem key={category.id} value={category.name}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="Create new">Create new</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
         />
         {category === "Create new" && (
           <FormField
             control={form.control}
             name="newCategory"
-            render={({ field }) => {
-              return (
-                <FormItem>
-                  <FormLabel>New category</FormLabel>
-                  <FormControl>
-                    <Input placeholder="New category" type="text" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              );
-            }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>New category</FormLabel>
+                <FormControl>
+                  <Input placeholder="New category" type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
         )}
         <Button type="submit">Submit</Button>
@@ -194,18 +234,34 @@ function FormContent() {
   );
 }
 
-export default function CreateTodoDialog() {
+export default function CreateTodoDialog({
+  mode,
+  todo,
+}: {
+  mode: "add" | "edit";
+  todo?: Todo;
+}) {
   return (
     <Dialog>
       <DialogTrigger className="flex gap-x-1 hover:cursor-pointer">
-        <Plus className="text-blue-500" />
-        Add a todo
+        {mode === "add" ? (
+          <>
+            <Plus className="text-blue-500" />
+            Add a todo
+          </>
+        ) : (
+          <div className="bg-blue-200 p-1 rounded-md">
+            <PencilLine className="text-blue-500" />
+          </div>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create a new todo</DialogTitle>
+          <DialogTitle>
+            {mode === "add" ? "Create a new todo" : "Edit todo"}
+          </DialogTitle>
         </DialogHeader>
-        <FormContent />
+        <FormContent todo={todo || null} mode={mode} />
       </DialogContent>
     </Dialog>
   );

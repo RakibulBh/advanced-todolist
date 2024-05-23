@@ -1,33 +1,59 @@
 "use server";
 
-import { Todo } from "@/types/custom";
+import { Category, Todo } from "@/types/custom";
 import { createClient } from "@/utils/supabase/server";
-import { create } from "domain";
 import { revalidatePath } from "next/cache";
 
-export async function createTodo(formData: any) {
+// Define types for function parameters
+interface FormData {
+  title: string;
+  date: string;
+  category: string | null;
+  newCategory: string | null;
+}
+
+export async function createTodo({
+  title,
+  due,
+  category_id,
+}: {
+  title: string;
+  due: string;
+  category_id: number;
+}): Promise<void> {
   const supabase = createClient();
 
-  const { title, date, category, newCategory } = formData;
-
-  if (
-    !title ||
-    !date ||
-    (category == null && newCategory.trim() === "") ||
-    (newCategory == null && category.trim() === "")
-  ) {
-    throw new Error("Please fill in all fields");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    throw new Error("You must be logged in to create a todo");
   }
+
+  const { data, error } = await supabase
+    .from("todos")
+    .insert({ title, due, category_id })
+    .select();
+
+  if (error || !data) {
+    throw new Error("Error occurred while creating todo");
+  }
+
+  revalidatePath("/todos");
+}
+
+export async function createCategory(
+  category: string
+): Promise<Category | Error> {
+  const supabase = createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be logged in to create a todo");
+    throw new Error("You must be logged in to create a category");
   }
-
-  let todo_category;
 
   const categories = await getCategories();
 
@@ -35,50 +61,8 @@ export async function createTodo(formData: any) {
     throw new Error("Error fetching user categories");
   }
 
-  if (category == null && newCategory !== null) {
-    const created_category = await createCategory(newCategory);
-    todo_category = created_category.id;
-  } else if (newCategory == null && category !== null) {
-    for (const cat of categories) {
-      if (cat.name === category) {
-        todo_category = cat.id;
-      }
-    }
-  }
-
-  const { data, error } = await supabase
-    .from("todos")
-    .insert({ title, due: date, category_id: todo_category })
-    .select();
-
-  if (error && !data) {
-    throw new Error("Error occured while creating todo");
-  }
-
-  revalidatePath("/todos");
-}
-
-export async function createCategory(category: String) {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("You must be logged in to create a todo");
-  }
-
-  const categories = await getCategories();
-
-  if (!categories || !category) {
-    return Error("Error fetching user categories");
-  }
-
-  for (const cat of categories) {
-    if (cat.name === category) {
-      throw new Error("Category already exists");
-    }
+  if (categories.some((cat) => cat.name === category)) {
+    throw new Error("Category already exists");
   }
 
   const { data, error } = await supabase
@@ -87,30 +71,38 @@ export async function createCategory(category: String) {
     .select();
 
   if (error) {
-    throw new Error("Error occured while creating category");
-  } else {
-    return data[0];
+    throw new Error("Error occurred while creating category");
   }
+
+  return data[0];
 }
 
-export async function getCategories() {
-  const supabase = await createClient();
+export async function getCategories(): Promise<Category[]> {
+  const supabase = createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be logged in to create a todo");
+    throw new Error("You must be logged in to retrieve categories");
   }
 
-  const { data: categories } = await supabase.from("categories").select();
+  const { data, error } = await supabase.from("categories").select();
 
-  return categories;
+  if (error) {
+    throw new Error("Error occurred while fetching categories");
+  }
+
+  return data;
 }
 
-export async function deleteTodo(id: number, category_id: number) {
+export async function deleteTodo(
+  id: number,
+  category_id: number
+): Promise<void> {
   const supabase = createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -119,32 +111,54 @@ export async function deleteTodo(id: number, category_id: number) {
     throw new Error("You must be logged in to delete a todo");
   }
 
-  const { error } = await supabase.from("todos").delete().match({
-    category_id,
-    id: id,
-  });
+  const { error } = await supabase
+    .from("todos")
+    .delete()
+    .match({ id, category_id });
 
   if (error) {
-    throw new Error("Error occured while deleting todo");
+    throw new Error("Error occurred while deleting todo");
   }
 
   revalidatePath("/todos");
 }
 
-export async function updateTodo(todo: Todo) {
+export async function getCategory(name: string): Promise<number> {
+  const categories = await getCategories();
+
+  if (!categories) {
+    throw new Error("Error fetching user categories");
+  }
+
+  const category = categories.find((cat) => cat.name === name);
+
+  if (!category) {
+    throw new Error("Category not found");
+  }
+
+  return category.id;
+}
+
+export async function updateTodo(todo: Todo): Promise<void> {
   const supabase = createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("You must be logged in to delete a todo");
+    throw new Error("You must be logged in to update a todo");
   }
 
-  const { error } = await supabase.from("todos").update(todo);
+  const { id, ...updateData } = todo;
+
+  const { data, error } = await supabase
+    .from("todos")
+    .update(updateData)
+    .match({ id });
 
   if (error) {
-    throw new Error("Error occured while updating todo");
+    throw new Error("Error occurred while updating todo");
   }
 
   revalidatePath("/todos");

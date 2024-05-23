@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { Square, SquareCheckBig, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import CreateTodoDialog from "./create-todo";
 import toast from "react-hot-toast";
 import { deleteTodo } from "@/app/todos/actions";
 import { Todo } from "@/types/custom";
+import { Checkbox } from "./ui/checkbox";
 
 export const TodoComponent = ({
   todo,
@@ -17,7 +18,6 @@ export const TodoComponent = ({
   categoryId: number;
 }) => {
   const [done, setDone] = useState(todo.completed);
-  const router = useRouter();
 
   const handleDelete = async () => {
     await deleteTodo(todo.id, categoryId);
@@ -55,20 +55,14 @@ export const TodoComponent = ({
   // define the dates
   const todayString = `${year}-${month}-${day}`;
 
-  const isToday: boolean = todayString === todo.due;
-  const isOverdue: boolean = todo.due < todayString;
+  const isToday: boolean = todayString === formatDate(todo.due);
+  const isOverdue: boolean = formatDate(todo.due) < todayString;
 
   return (
     <div className="group w-full rounded-md border-2 border-gray-300  h-10 px-2 py-6 items-center flex justify-start">
       <div className="gap-x-2 flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
-          <div onClick={handleTick} className="hover:cursor-pointer">
-            {done ? (
-              <SquareCheckBig className="text-green-500" />
-            ) : (
-              <Square className=" text-gray-400" />
-            )}
-          </div>
+          <Checkbox />
           <p>{todo.title}</p>
           <p
             className={cn(
@@ -80,10 +74,11 @@ export const TodoComponent = ({
           >
             {isToday && "Today"}
             {isOverdue && "Overdue"}
-            {!(isToday || isOverdue) && todo.due}
+            {!(isToday || isOverdue) && formatDate(todo.due)}
           </p>
         </div>
         <div className="group-hover:flex hidden transition-opacity duration-75 gap-x-2">
+          <CreateTodoDialog mode="edit" todo={todo} />
           <div
             onClick={handleDelete}
             className="bg-red-200 p-1 rounded-md hover:cursor-pointer"

@@ -35,7 +35,7 @@ export default async function SectionContent() {
         <span className="text-3xl">📦</span>
         <span className="font-extrabold text-3xl">My Todos</span>
       </div>
-      <CreateTodoDialog />
+      <CreateTodoDialog mode="add" />
       {categories &&
         categories.map((category: Category) => (
           <TodoSection key={category.id} category={category} />
