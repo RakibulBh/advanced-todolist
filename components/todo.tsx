@@ -6,20 +6,22 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CreateTodoDialog from "./create-todo";
 import toast from "react-hot-toast";
+import { deleteTodo } from "@/app/todos/actions";
+import { Todo } from "@/types/custom";
 
-interface Todo {
-  id: string;
-  title: string;
-  due: string;
-  done: boolean;
-}
-
-export const Todo = ({ todo }: { todo: Todo }) => {
-  const [done, setDone] = useState(todo.done);
+export const TodoComponent = ({
+  todo,
+  categoryId,
+}: {
+  todo: Todo;
+  categoryId: number;
+}) => {
+  const [done, setDone] = useState(todo.completed);
   const router = useRouter();
 
   const handleDelete = async () => {
-    console.log("To delete!");
+    await deleteTodo(todo.id, categoryId);
+    toast.success("Todo deleted successfully");
   };
 
   const handleEdit = async () => {

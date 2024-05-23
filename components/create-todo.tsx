@@ -31,13 +31,14 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useRef, useState } from "react";
 import { createTodo, getCategories } from "@/app/todos/actions";
+import { Category } from "@/types/custom";
 
 const formSchema = z
   .object({
     title: z.string().min(3),
     date: z.string(),
     category: z.string(),
-    newCategory: z.string().min(3).optional(),
+    newCategory: z.string().optional(),
   })
   .refine(
     (data) => {
@@ -52,19 +53,27 @@ const formSchema = z
       message: "New category cannot be empty or named 'Create new'.",
       path: ["newCategory"],
     }
+  )
+  .refine(
+    (data) => {
+      if (data.date === "") {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "Date cannot be empty",
+      path: ["date"],
+    }
   );
 
 function FormContent() {
-  const [categories, setCategories] = useState<any[] | null>();
+  const [categories, setCategories] = useState<Category[] | null>();
 
   useEffect(() => {
     const fetchCategories = async () => {
-      try {
-        const fetched_categories = await getCategories();
-        setCategories(fetched_categories);
-      } catch (err: any) {
-        toast.error(err);
-      }
+      const fetched_categories = await getCategories();
+      setCategories(fetched_categories);
     };
 
     fetchCategories();
@@ -74,10 +83,10 @@ function FormContent() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    // defaultValues: {
-    //   title: "Hey",
-    //   newCategory: "",
-    // },
+    defaultValues: {
+      title: "",
+      date: "",
+    },
   });
 
   const category = form.watch("category");
@@ -88,7 +97,6 @@ function FormContent() {
     } else {
       data.newCategory = null;
     }
-
     await createTodo(data);
     formRef.current?.reset();
   };

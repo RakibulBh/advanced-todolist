@@ -5,9 +5,10 @@ import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Category } from "@/types/custom";
 
 export default async function SectionContent() {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },
@@ -36,7 +37,7 @@ export default async function SectionContent() {
       </div>
       <CreateTodoDialog />
       {categories &&
-        categories.map((category) => (
+        categories.map((category: Category) => (
           <TodoSection key={category.id} category={category} />
         ))}
     </div>

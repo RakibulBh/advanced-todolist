@@ -1,17 +1,12 @@
 "use server";
 
+import { Todo } from "@/types/custom";
 import { createClient } from "@/utils/supabase/server";
+import { create } from "domain";
 import { revalidatePath } from "next/cache";
 
-type Todo = {
-  id: string;
-  title: string;
-  due: string;
-  done: boolean;
-};
-
 export async function createTodo(formData: any) {
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const { title, date, category, newCategory } = formData;
 
@@ -112,4 +107,45 @@ export async function getCategories() {
   const { data: categories } = await supabase.from("categories").select();
 
   return categories;
+}
+
+export async function deleteTodo(id: number, category_id: number) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in to delete a todo");
+  }
+
+  const { error } = await supabase.from("todos").delete().match({
+    category_id,
+    id: id,
+  });
+
+  if (error) {
+    throw new Error("Error occured while deleting todo");
+  }
+
+  revalidatePath("/todos");
+}
+
+export async function updateTodo(todo: Todo) {
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("You must be logged in to delete a todo");
+  }
+
+  const { error } = await supabase.from("todos").update(todo);
+
+  if (error) {
+    throw new Error("Error occured while updating todo");
+  }
+
+  revalidatePath("/todos");
 }

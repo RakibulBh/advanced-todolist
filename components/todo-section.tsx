@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import { Chevron } from "@/components/ui/chevron";
-import { createClient } from "@/utils/supabase/server";
-import { Todo } from "@/components/todo";
+import { TodoComponent } from "@/components/todo";
+import { Category } from "@/types/custom";
+import { Todo } from "@/types/custom";
 
 // TODO: get the todos for each category
 
-export default function TodoSection({ category }: { category: any }) {
+export default function TodoSection({ category }: { category: Category }) {
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
@@ -23,7 +24,9 @@ export default function TodoSection({ category }: { category: any }) {
       <div className="pl-9 space-y-2">
         {!open &&
           category.todos &&
-          category.todos.map((todo: any) => <Todo key={todo.id} todo={todo} />)}
+          category.todos.map((todo: Todo) => (
+            <TodoComponent key={todo.id} categoryId={category.id} todo={todo} />
+          ))}
       </div>
     </div>
   );
