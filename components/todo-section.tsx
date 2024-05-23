@@ -1,22 +1,12 @@
 "use client";
-
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { Todo } from "./todo";
 import { useState } from "react";
+import { Chevron } from "@/components/ui/chevron";
+import { createClient } from "@/utils/supabase/server";
+import { Todo } from "@/components/todo";
 
-interface Todo {
-  id: string;
-  title: string;
-  due: string;
-  done: boolean;
-}
-type Category = {
-  id: string;
-  name: string;
-  todos: Todo[];
-};
+// TODO: get the todos for each category
 
-export default function TodoSection({ category }: { category: Category }) {
+export default function TodoSection({ category }: { category: any }) {
   const [open, setOpen] = useState(false);
 
   const handleClick = () => {
@@ -26,18 +16,14 @@ export default function TodoSection({ category }: { category: Category }) {
   return (
     <div className="flex flex-col w-full gap-y-2">
       <div className="flex gap-x-3 items-center">
-        <div className="hover:cursor-pointer" onClick={handleClick}>
-          {open ? <ChevronUp /> : <ChevronDown />}
-        </div>
+        <Chevron open={open} handleClick={handleClick} />
         <p className="font-bold text-xl text-gray-700 ">{category.name}</p>
         <p className="text-gray-500 text-xl">{category.todos.length}</p>
       </div>
       <div className="pl-9 space-y-2">
         {!open &&
-          category &&
-          category.todos.map((todo: Todo) => (
-            <Todo key={todo.id} todo={todo} />
-          ))}
+          category.todos &&
+          category.todos.map((todo: any) => <Todo key={todo.id} todo={todo} />)}
       </div>
     </div>
   );

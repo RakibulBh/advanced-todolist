@@ -37,28 +37,25 @@ export type Database = {
       }
       todos: {
         Row: {
-          category_id: number | null
+          category_id: number
           completed: boolean | null
           due: string | null
           id: number
           title: string
-          user_id: string
         }
         Insert: {
-          category_id?: number | null
+          category_id: number
           completed?: boolean | null
           due?: string | null
           id?: never
           title: string
-          user_id: string
         }
         Update: {
-          category_id?: number | null
+          category_id?: number
           completed?: boolean | null
           due?: string | null
           id?: never
           title?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -66,13 +63,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "todos_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

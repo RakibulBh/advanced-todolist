@@ -88,7 +88,6 @@ export const Todo = ({ todo }: { todo: Todo }) => {
           >
             <Trash2 className="text-red-500" />
           </div>
-          <CreateTodoDialog todo={todo} mode="edit" />
         </div>
       </div>
     </div>
