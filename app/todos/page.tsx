@@ -40,6 +40,7 @@ export default async function SectionContent() {
         categories.map((category: Category) => (
           <TodoSection key={category.id} category={category} />
         ))}
+      <div className="pb-20" />
     </div>
   );
 }

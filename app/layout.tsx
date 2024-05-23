@@ -4,6 +4,7 @@ import "./globals.css";
 import { Sidebar } from "@/components/sidebar";
 import { cn } from "@/lib/utils";
 import { Toaster } from "react-hot-toast";
+import { MobileSidebar } from "@/components/mobile-sidebar";
 
 const roboto = Roboto({ subsets: ["latin"], weight: "500" });
 
@@ -19,10 +20,15 @@ export default async function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={cn("flex w-full min-h-screen", roboto.className)}>
+      <body className={cn("h-screen overflow-hidden flex", roboto.className)}>
         <Toaster />
-        <Sidebar />
-        <main className="pl-[250px] min-h-full w-full">{children}</main>
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+        <MobileSidebar />
+        <main className="flex-1 overflow-y-auto  md:pl-[350px]">
+          {children}
+        </main>
       </body>
     </html>
   );

@@ -36,7 +36,7 @@ export const Sidebar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="pt-10 px-3 space-y-6 fixed h-screen w-[250px] bg-gray-100 border-r-gray-200 border-[1px]">
+    <div className="flex pt-10 pb-3 px-3 space-y-6 fixed h-screen  w-[350px] bg-gray-100 border-r-gray-200 border-[1px] flex-col justify-between rounded-r-xl">
       <div className="flex flex-col gap-y-3">
         {summaryData.map((data) => (
           <div key={data.title} className="flex justify-between items-center">
@@ -53,18 +53,29 @@ export const Sidebar = async () => {
         <p className="">Trash</p>
       </div>
       <div className="h-[1px] w-full bg-gray-300" />
-      {user ? (
-        <div>
-          <p>{user.email}</p>
-          <form action={signout}>
-            <Button>Logout</Button>
-          </form>
+      <div className="flex justify-between flex-col h-full">
+        <div className="mr-auto flex flex-col gap-y-2">
+          {user && (
+            <>
+              <Link href="/">Home</Link>
+              <Link href="/todos">Todos</Link>
+              <Link href="/categories">Categories</Link>
+              <Link href="/settings">Settings</Link>
+            </>
+          )}
         </div>
-      ) : (
-        <Button>
-          <Link href="/login">Login</Link>
-        </Button>
-      )}
+        <div className="flex items-center mx-auto">
+          {user ? (
+            <form>
+              <Button formAction={signout}>Sign out</Button>
+            </form>
+          ) : (
+            <Link href="/login">
+              <Button>Sign in</Button>
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
