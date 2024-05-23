@@ -26,9 +26,7 @@ export default async function RootLayout({
           <Sidebar />
         </div>
         <MobileSidebar />
-        <main className="flex-1 overflow-y-auto  md:pl-[350px]">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto md:pl-[300px]">{children}</main>
       </body>
     </html>
   );

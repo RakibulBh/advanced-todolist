@@ -36,7 +36,7 @@ export const Sidebar = async () => {
   } = await supabase.auth.getUser();
 
   return (
-    <div className="flex pt-10 pb-3 px-3 space-y-6 fixed h-screen  w-[350px] bg-gray-100 border-r-gray-200 border-[1px] flex-col justify-between rounded-r-xl">
+    <div className="flex pt-10 pb-3 px-3 space-y-6 fixed h-screen w-[350px] bg-gray-100 border-r-gray-200 border-[1px] flex-col justify-between rounded-r-xl">
       <div className="flex flex-col gap-y-3">
         {summaryData.map((data) => (
           <div key={data.title} className="flex justify-between items-center">
