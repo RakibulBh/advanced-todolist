@@ -17,10 +17,13 @@ import { Menu } from "lucide-react";
 export const MobileSidebar = () => {
   return (
     <Sheet>
-      <SheetTrigger className="mt-8 px-2" asChild>
-        <Menu size={50} />
+      <SheetTrigger className="mt-5" asChild>
+        <Menu size={35} />
       </SheetTrigger>
-      <SheetContent className="block md:hidden p-0 w-[250px]" side="left">
+      <SheetContent
+        className="block md:hidden p-0 w-[250px] rounded-r-xl"
+        side="left"
+      >
         <Sidebar />
       </SheetContent>
     </Sheet>
