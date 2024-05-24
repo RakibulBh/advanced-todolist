@@ -1,12 +1,6 @@
 import Link from "next/link";
-import Navlink from "./nav-link";
-import { getServerSession } from "next-auth";
 import { Button } from "./ui/button";
-import { cn } from "@/lib/utils";
-import { signIn } from "next-auth/react";
-import { LoginBtn } from "./auth/login-btn";
 import { Calendar, CalendarCheck, CalendarClock, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/server";
 import { signout } from "@/app/login/actions";
 
@@ -29,7 +23,7 @@ export const Sidebar = async () => {
     },
   ];
 
-  const supabase = await createClient();
+  const supabase = createClient();
 
   const {
     data: { user },
