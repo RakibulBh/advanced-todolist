@@ -6,9 +6,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CreateTodoDialog from "./create-todo";
 import toast from "react-hot-toast";
-import { deleteTodo } from "@/app/todos/actions";
+import { deleteTodo, updateTodo } from "@/app/todos/actions";
 import { Todo } from "@/types/custom";
 import { Checkbox } from "./ui/checkbox";
+import { set } from "zod";
 
 export const TodoComponent = ({
   todo,
@@ -58,11 +59,22 @@ export const TodoComponent = ({
   const isToday: boolean = todayString === formatDate(todo.due);
   const isOverdue: boolean = formatDate(todo.due) < todayString;
 
+  const [checked, setChecked] = useState(todo.completed || false);
+
+  const handleCheck = async (value: boolean) => {
+    setChecked(value);
+    await updateTodo({ ...todo, completed: value });
+  };
+
   return (
-    <div className="group w-full rounded-md border-2 border-gray-300  h-10 px-2 py-6 items-center flex justify-start">
+    <div className="group w-full   h-10 px-2 py-6 items-center flex justify-start">
       <div className="gap-x-2 flex w-full justify-between items-center">
         <div className="flex gap-x-2 items-center">
-          <Checkbox />
+          <Checkbox
+            className="border-gray-400"
+            checked={checked}
+            onCheckedChange={(value: boolean) => handleCheck(value)}
+          />
           <p>{todo.title}</p>
           <p
             className={cn(

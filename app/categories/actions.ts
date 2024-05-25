@@ -14,8 +14,6 @@ export const deleteCategory = async (id: number) => {
     throw new Error("You must be logged in to delete a todo");
   }
 
-  console.log(id);
-
   const { data, error } = await supabase
     .from("categories")
     .delete()
@@ -26,8 +24,6 @@ export const deleteCategory = async (id: number) => {
     console.log(error);
     throw new Error("Error occurred while deleting category");
   }
-
-  console.log(data);
 
   revalidatePath("/todos");
 };

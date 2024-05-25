@@ -4,7 +4,6 @@ import { Category, Todo } from "@/types/custom";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 
-// Define types for function parameters
 interface FormData {
   title: string;
   date: string;
@@ -155,7 +154,8 @@ export async function updateTodo(todo: Todo): Promise<void> {
   const { data, error } = await supabase
     .from("todos")
     .update(updateData)
-    .match({ id });
+    .match({ id })
+    .select();
 
   if (error) {
     throw new Error("Error occurred while updating todo");
