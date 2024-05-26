@@ -39,6 +39,8 @@ import {
 } from "@/app/todos/actions";
 import { Category, Todo } from "@/types/custom";
 import { formatDate } from "@/lib/utils";
+import { useFormStatus } from "react-dom";
+import { useRouter } from "next/router";
 
 const formSchema = z
   .object({
@@ -67,11 +69,108 @@ const formSchema = z
   });
 
 function FormContent({
+  form,
+  categories,
+  category,
+}: {
+  mode: "add" | "edit";
+  todo?: Todo | null;
+  form: any;
+  categories: any;
+  category: any;
+}) {
+  const { pending } = useFormStatus();
+
+  return (
+    <>
+      <FormField
+        disabled={pending}
+        control={form.control}
+        name="title"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Title</FormLabel>
+            <FormControl>
+              <Input placeholder="Title" type="text" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        disabled={pending}
+        control={form.control}
+        name="date"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Date</FormLabel>
+            <FormControl>
+              <Input placeholder="Date" type="date" {...field} />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        disabled={pending}
+        control={form.control}
+        name="category"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Category</FormLabel>
+            <Select
+              onValueChange={(value) => {
+                field.onChange(value);
+                form.setValue("category", value);
+              }}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {categories?.map((category: Category) => (
+                  <SelectItem key={category.id} value={category.name}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value="Create new">Create new</SelectItem>
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {category === "Create new" && (
+        <FormField
+          disabled={pending}
+          control={form.control}
+          name="newCategory"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>New category</FormLabel>
+              <FormControl>
+                <Input placeholder="New category" type="text" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      )}
+      <Button disabled={pending} type="submit">
+        Submit
+      </Button>
+    </>
+  );
+}
+
+export default function CreateTodoDialog({
   mode,
   todo,
 }: {
   mode: "add" | "edit";
-  todo?: Todo | null;
+  todo?: Todo;
 }) {
   const [categories, setCategories] = useState<Category[] | null>(null);
 
@@ -151,97 +250,6 @@ function FormContent({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        ref={formRef}
-        className="w-full flex flex-col gap-4"
-      >
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Title" type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-              <FormControl>
-                <Input placeholder="Date" type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="category"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Category</FormLabel>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  form.setValue("category", value);
-                }}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {categories?.map((category: Category) => (
-                    <SelectItem key={category.id} value={category.name}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                  <SelectItem value="Create new">Create new</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {category === "Create new" && (
-          <FormField
-            control={form.control}
-            name="newCategory"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>New category</FormLabel>
-                <FormControl>
-                  <Input placeholder="New category" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
-  );
-}
-
-export default function CreateTodoDialog({
-  mode,
-  todo,
-}: {
-  mode: "add" | "edit";
-  todo?: Todo;
-}) {
-  return (
     <Dialog>
       <DialogTrigger className="flex gap-x-1 hover:cursor-pointer">
         {mode === "add" ? (
@@ -261,7 +269,21 @@ export default function CreateTodoDialog({
             {mode === "add" ? "Create a new todo" : "Edit todo"}
           </DialogTitle>
         </DialogHeader>
-        <FormContent todo={todo || null} mode={mode} />
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            ref={formRef}
+            className="w-full flex flex-col gap-4"
+          >
+            <FormContent
+              categories={categories}
+              form={form}
+              todo={todo || null}
+              category={category}
+              mode={mode}
+            />
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
