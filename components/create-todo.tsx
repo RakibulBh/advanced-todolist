@@ -29,7 +29,7 @@ import {
   SelectItem,
   Select,
 } from "@/components/ui/select";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   createCategory,
   createTodo,
@@ -39,8 +39,6 @@ import {
 } from "@/app/todos/actions";
 import { Category, Todo } from "@/types/custom";
 import { formatDate } from "@/lib/utils";
-import { useFormStatus } from "react-dom";
-import { useRouter } from "next/router";
 
 const formSchema = z
   .object({
@@ -72,19 +70,18 @@ function FormContent({
   form,
   categories,
   category,
+  pending,
 }: {
   mode: "add" | "edit";
   todo?: Todo | null;
   form: any;
   categories: any;
   category: any;
+  pending: boolean;
 }) {
-  const { pending } = useFormStatus();
-
   return (
     <>
       <FormField
-        disabled={pending}
         control={form.control}
         name="title"
         render={({ field }) => (
@@ -98,7 +95,6 @@ function FormContent({
         )}
       />
       <FormField
-        disabled={pending}
         control={form.control}
         name="date"
         render={({ field }) => (
@@ -112,7 +108,6 @@ function FormContent({
         )}
       />
       <FormField
-        disabled={pending}
         control={form.control}
         name="category"
         render={({ field }) => (
@@ -144,7 +139,6 @@ function FormContent({
       />
       {category === "Create new" && (
         <FormField
-          disabled={pending}
           control={form.control}
           name="newCategory"
           render={({ field }) => (
@@ -159,7 +153,7 @@ function FormContent({
         />
       )}
       <Button disabled={pending} type="submit">
-        Submit
+        {pending ? "Submitting" : "Submit"}
       </Button>
     </>
   );
@@ -173,6 +167,8 @@ export default function CreateTodoDialog({
   todo?: Todo;
 }) {
   const [categories, setCategories] = useState<Category[] | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -182,8 +178,6 @@ export default function CreateTodoDialog({
 
     fetchCategories();
   }, []);
-
-  const formRef = useRef<HTMLFormElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -210,47 +204,56 @@ export default function CreateTodoDialog({
       return;
     }
 
-    let categoryId: number;
+    setIsSubmitting(true);
 
-    if (data.category === "Create new" && data.newCategory) {
-      const createdCategory = await createCategory(data.newCategory);
-      if (createdCategory instanceof Error) {
-        toast.error("Error occurred while creating new category");
-        return;
+    try {
+      let categoryId: number;
+
+      if (data.category === "Create new" && data.newCategory) {
+        const createdCategory = await createCategory(data.newCategory);
+        if (createdCategory instanceof Error) {
+          toast.error("Error occurred while creating new category");
+          return;
+        } else {
+          categoryId = createdCategory.id;
+        }
       } else {
-        categoryId = createdCategory.id;
+        categoryId = await getCategory(data.category);
       }
-    } else {
-      categoryId = await getCategory(data.category);
+
+      if (!categoryId) {
+        toast.error("Error occurred while fetching or creating category");
+        return;
+      }
+
+      const todoData = {
+        title: data.title,
+        due: data.date,
+        category_id: categoryId,
+      };
+
+      if (!todo) {
+        await createTodo({
+          ...todoData,
+        });
+      } else {
+        await updateTodo({
+          ...todo,
+          ...todoData,
+        });
+      }
+
+      form.reset();
+      setIsOpen(false);
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (!categoryId) {
-      toast.error("Error occurred while fetching or creating category");
-      return;
-    }
-
-    const todoData = {
-      title: data.title,
-      due: data.date,
-      category_id: categoryId,
-    };
-
-    if (!todo) {
-      await createTodo({
-        ...todoData,
-      });
-    } else {
-      await updateTodo({
-        ...todo,
-        ...todoData,
-      });
-    }
-
-    formRef.current?.reset();
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className="flex gap-x-1 hover:cursor-pointer">
         {mode === "add" ? (
           <>
@@ -272,7 +275,6 @@ export default function CreateTodoDialog({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            ref={formRef}
             className="w-full flex flex-col gap-4"
           >
             <FormContent
@@ -281,6 +283,7 @@ export default function CreateTodoDialog({
               todo={todo || null}
               category={category}
               mode={mode}
+              pending={isSubmitting}
             />
           </form>
         </Form>
