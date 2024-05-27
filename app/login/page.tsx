@@ -31,7 +31,7 @@ async function Login() {
         </form>
         <div className="flex items-center gap-x-2">
           <p className="text-s md:text-md text-gray-400">
-            Don't have an account?
+            Don&apos;t have an account?
           </p>
           <Link href="/signup">
             <p className="underline underline-offset-1 md:text-md text-s">
