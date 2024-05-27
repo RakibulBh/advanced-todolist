@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { PencilLine, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import {
@@ -39,16 +38,18 @@ import {
 } from "@/app/todos/actions";
 import { Category, Todo } from "@/types/custom";
 import { formatDate } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z
   .object({
-    title: z.string().min(3),
-    date: z.string(),
-    category: z.string(),
+    title: z.string().optional(),
+    date: z.string().optional(),
+    category: z.string().optional(),
     newCategory: z.string().optional(),
   })
   .refine(
     (data) => {
+      console.log(data);
       if (data.newCategory?.toLowerCase().split(" ").join("") === "createnew") {
         return false;
       } else if (data.category === "Create new" && !data.newCategory) {
@@ -65,99 +66,6 @@ const formSchema = z
     message: "Date cannot be empty",
     path: ["date"],
   });
-
-function FormContent({
-  form,
-  categories,
-  category,
-  pending,
-}: {
-  mode: "add" | "edit";
-  todo?: Todo | null;
-  form: any;
-  categories: any;
-  category: any;
-  pending: boolean;
-}) {
-  return (
-    <>
-      <FormField
-        control={form.control}
-        name="title"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Title</FormLabel>
-            <FormControl>
-              <Input placeholder="Title" type="text" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="date"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Date</FormLabel>
-            <FormControl>
-              <Input placeholder="Date" type="date" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="category"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Category</FormLabel>
-            <Select
-              onValueChange={(value) => {
-                field.onChange(value);
-                form.setValue("category", value);
-              }}
-            >
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {categories?.map((category: Category) => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-                <SelectItem value="Create new">Create new</SelectItem>
-              </SelectContent>
-            </Select>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      {category === "Create new" && (
-        <FormField
-          control={form.control}
-          name="newCategory"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>New category</FormLabel>
-              <FormControl>
-                <Input placeholder="New category" type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      )}
-      <Button disabled={pending} type="submit">
-        {pending ? "Submitting" : "Submit"}
-      </Button>
-    </>
-  );
-}
 
 export default function CreateTodoDialog({
   mode,
@@ -177,21 +85,7 @@ export default function CreateTodoDialog({
     };
 
     fetchCategories();
-  }, []);
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: todo ? todo.title : "",
-      date: todo ? formatDate(todo.due) : "",
-      category: todo
-        ? categories?.find((cat) => cat.id === todo.category_id)?.name || ""
-        : "",
-      newCategory: "",
-    },
-  });
-
-  const category = form.watch("category");
+  }, [isOpen]);
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
     if (
@@ -252,6 +146,18 @@ export default function CreateTodoDialog({
     }
   };
 
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: todo ? todo.title : "",
+      date: todo ? formatDate(todo.due) : "",
+      category: "",
+      newCategory: "",
+    },
+  });
+
+  const category = form.watch("category");
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger className="flex gap-x-1 hover:cursor-pointer">
@@ -277,14 +183,90 @@ export default function CreateTodoDialog({
             onSubmit={form.handleSubmit(handleSubmit)}
             className="w-full flex flex-col gap-4"
           >
-            <FormContent
-              categories={categories}
-              form={form}
-              todo={todo || null}
-              category={category}
-              mode={mode}
-              pending={isSubmitting}
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Title" type="text" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="date"
+                      placeholder="Date"
+                      type="date"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      form.setValue("category", value);
+                    }}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories?.map((category: Category) => (
+                        <SelectItem key={category.id} value={category.name}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      <SelectItem value="Create new">Create new</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {category === "Create new" && (
+              <FormField
+                control={form.control}
+                name="newCategory"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New category</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="category"
+                        placeholder="New category"
+                        type="text"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <Button disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Submitting" : "Submit"}
+            </Button>
           </form>
         </Form>
       </DialogContent>

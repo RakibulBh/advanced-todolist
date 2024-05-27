@@ -11,6 +11,8 @@ import { Todo } from "@/types/custom";
 import { Checkbox } from "./ui/checkbox";
 import { set } from "zod";
 
+export type Action = "delete" | "update" | "create";
+
 export const TodoComponent = ({
   todo,
   categoryId,
@@ -23,10 +25,6 @@ export const TodoComponent = ({
   const handleDelete = async () => {
     await deleteTodo(todo.id, categoryId);
     toast.success("Todo deleted successfully");
-  };
-
-  const handleEdit = async () => {
-    console.log("To Edit!");
   };
 
   const handleTick = async () => {
